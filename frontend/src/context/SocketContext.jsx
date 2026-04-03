@@ -23,7 +23,8 @@ const socket =
         ? createNoOpSocket()
         : io(API_BASE_URL, {
               transports: ['polling', 'websocket'],
-              withCredentials: true,
+              // Must stay false unless server echoes a specific Origin (not *) — matches JWT-in-header flow
+              withCredentials: false,
               reconnectionAttempts: 8,
               reconnectionDelay: 1500,
           });

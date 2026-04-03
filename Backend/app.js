@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
 const connectToDb = require('./config/db');
-const { expressCorsOptions } = require('./config/cors.config');
+const { expressCorsOptions, getAllowedOriginsList } = require('./config/cors.config');
 
 const userRoutes = require('./routes/user.routes');
 const captainRoutes = require('./routes/captain.routes');
@@ -15,8 +15,6 @@ const adminRoutes = require('./routes/admin.routes');
 const driverSubscriptionRoutes = require('./routes/driverSubscriptions.routes');
 const healthRoutes = require('./routes/health.routes');
 const webhooksController = require('./controllers/webhooks.controller');
-
-connectToDb();
 
 const app = express();
 
@@ -28,14 +26,20 @@ const corsOptions = expressCorsOptions();
 // Optional: set CORS_DEBUG=true to log Origin on each request
 if (process.env.CORS_DEBUG === 'true') {
     app.use((req, res, next) => {
-        console.log('[CORS debug]', req.method, req.path, 'origin=', req.headers.origin || '(none)');
+        console.log('[CORS debug] <=', req.method, req.path, 'Origin:', req.headers.origin || '(none)');
+        res.on('finish', () => {
+            const acao = res.getHeader('Access-Control-Allow-Origin');
+            if (acao) console.log('[CORS debug] => ACAO:', acao);
+        });
         next();
     });
 }
 
-// CORS before routes / body parsers (preflight must succeed)
+// CORS at the top — before DB, body parsers, and routes (preflight must succeed)
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+connectToDb();
 
 // Optional HTTPS enforcement (useful behind reverse proxies/load balancers)
 if (process.env.FORCE_HTTPS === 'true') {
@@ -83,6 +87,10 @@ const apiLimiter = rateLimit({
     legacyHeaders: false,
 });
 app.use(apiLimiter);
+
+if (process.env.NODE_ENV === 'production' || process.env.RENDER === 'true') {
+    console.log('[CORS] allowed origins (env + fallback):', getAllowedOriginsList());
+}
 
 app.get('/', (req, res) => res.send('OK'));
 app.use('/health', healthRoutes);

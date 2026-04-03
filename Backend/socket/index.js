@@ -1,4 +1,5 @@
 const socketIo = require('socket.io');
+const { socketIoCorsConfig } = require('../config/cors.config');
 const userModel = require('../models/user.model');
 const captainModel = require('../models/captain.model');
 const rideModel = require('../models/rideCore.model');
@@ -32,7 +33,7 @@ function getIo() {
 
 function initializeSocket(server, app) {
     io = socketIo(server, {
-        cors: { origin: '*', methods: [ 'GET', 'POST' ], credentials: true },
+        cors: socketIoCorsConfig(),
     });
 
     if (app) app.set('io', io);

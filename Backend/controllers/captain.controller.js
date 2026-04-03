@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const captainModel = require('../models/captain.model');
 const blackListTokenModel = require('../models/blackListToken.model');
 const rideModel = require('../models/rideCore.model');
+const { getAuthCookieOptions } = require('../utils/authCookie');
 const { randomSixDigit, expiresInMinutes } = require('../utils/otp');
 const { expiresAfterPlan, syncSubscriptionState, isSubscriptionValid } = require('../services/subscriptionDriver.service');
 
@@ -34,7 +35,7 @@ module.exports.registerCaptain = async (req, res) => {
     });
 
     const token = captain.generateAuthToken();
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie('token', token, getAuthCookieOptions());
     return res.status(201).json({ token, captain });
 };
 
@@ -51,7 +52,7 @@ module.exports.loginCaptain = async (req, res) => {
 
     const fresh = await syncSubscriptionState(captain);
     const token = fresh.generateAuthToken();
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie('token', token, getAuthCookieOptions());
     return res.status(200).json({
         token,
         captain: fresh,
@@ -80,7 +81,7 @@ module.exports.getCaptainProfile = async (req, res) => {
 module.exports.logoutCaptain = async (req, res) => {
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
     if (token) await blackListTokenModel.create({ token });
-    res.clearCookie('token');
+    res.clearCookie('token', getAuthCookieOptions());
     return res.status(200).json({ message: 'Logout successfully' });
 };
 

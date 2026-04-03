@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const userModel = require('../models/user.model');
 const blackListTokenModel = require('../models/blackListToken.model');
 const { randomSixDigit, expiresInMinutes } = require('../utils/otp');
+const { getAuthCookieOptions } = require('../utils/authCookie');
 
 function verifyBankDetails({ accountHolderName, accountNumber, ifscCode, upiId }) {
     const holder = String(accountHolderName || '').trim();
@@ -50,7 +51,7 @@ module.exports.registerUser = async (req, res) => {
     });
 
     const token = user.generateAuthToken();
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie('token', token, getAuthCookieOptions());
     return res.status(201).json({ token, user });
 };
 
@@ -66,7 +67,7 @@ module.exports.loginUser = async (req, res) => {
     if (!ok) return res.status(401).json({ message: 'Invalid email or password' });
 
     const token = user.generateAuthToken();
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie('token', token, getAuthCookieOptions());
     return res.status(200).json({ token, user });
 };
 
@@ -77,7 +78,7 @@ module.exports.getProfile = async (req, res) => {
 module.exports.logoutUser = async (req, res) => {
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
     if (token) await blackListTokenModel.create({ token });
-    res.clearCookie('token');
+    res.clearCookie('token', getAuthCookieOptions());
     return res.status(200).json({ message: 'Logout successfully' });
 };
 

@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
 const connectToDb = require('./config/db');
+const { expressCorsOptions } = require('./config/cors.config');
 
 const userRoutes = require('./routes/user.routes');
 const captainRoutes = require('./routes/captain.routes');
@@ -22,15 +23,31 @@ const app = express();
 app.set('etag', false);
 app.set('trust proxy', 1);
 
-const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CLIENT_ORIGINS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+const corsOptions = expressCorsOptions();
 
-const isProd = process.env.NODE_ENV === 'production';
+// Optional: set CORS_DEBUG=true to log Origin on each request
+if (process.env.CORS_DEBUG === 'true') {
+    app.use((req, res, next) => {
+        console.log('[CORS debug]', req.method, req.path, 'origin=', req.headers.origin || '(none)');
+        next();
+    });
+}
+
+// CORS before routes / body parsers (preflight must succeed)
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+// Optional HTTPS enforcement (useful behind reverse proxies/load balancers)
+if (process.env.FORCE_HTTPS === 'true') {
+    app.use((req, res, next) => {
+        if (req.secure) return next();
+        const host = req.headers.host;
+        if (!host) return next();
+        return res.redirect(301, `https://${host}${req.originalUrl}`);
+    });
+}
 
 // Optional error monitoring (Sentry)
-// Enable by setting `SENTRY_DSN` in Backend/.env
 let Sentry = null;
 try {
     Sentry = require('@sentry/node');
@@ -51,35 +68,6 @@ if (Sentry?.init && process.env.SENTRY_DSN) {
         app.use(Sentry.Handlers.tracingHandler());
     }
 }
-
-// Optional HTTPS enforcement (useful behind reverse proxies/load balancers)
-if (process.env.FORCE_HTTPS === 'true') {
-    app.use((req, res, next) => {
-        if (req.secure) return next();
-        // If there's no host header, just continue.
-        const host = req.headers.host;
-        if (!host) return next();
-
-        // Redirect everything to HTTPS.
-        return res.redirect(301, `https://${host}${req.originalUrl}`);
-    });
-}
-
-app.use(cors({
-    origin: (origin, cb) => {
-        if (!origin) return cb(null, true);
-        if (!allowedOrigins.length) {
-            if (isProd && process.env.CORS_ALLOW_ALL !== 'true') {
-                return cb(new Error('CORS_ORIGINS/CLIENT_ORIGINS not set in production'), false);
-            }
-            if (isProd) console.warn('CORS_ORIGINS empty in production — allowing all origins because CORS_ALLOW_ALL=true');
-            return cb(null, true);
-        }
-        return cb(null, allowedOrigins.includes(origin));
-    },
-    credentials: true,
-    methods: [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS' ],
-}));
 
 /** Razorpay needs raw body for signature — before express.json() */
 app.post('/webhooks/razorpay', express.raw({ type: 'application/json', limit: '256kb' }), webhooksController.razorpayWebhook);
@@ -106,10 +94,8 @@ app.use('/rides', rideRoutes);
 app.use('/admin', adminRoutes);
 app.use('/driver-subscriptions', driverSubscriptionRoutes);
 
-// Sentry error handler (must be after all routes/middlewares)
 if (Sentry?.Handlers?.errorHandler) {
     app.use(Sentry.Handlers.errorHandler());
 }
 
 module.exports = app;
-

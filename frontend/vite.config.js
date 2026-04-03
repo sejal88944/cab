@@ -50,7 +50,13 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      "untransformative-jennine-mesic.ngrok-free.dev"
-    ]
-  }
+      '.onrender.com',
+      'localhost',
+      'untransformative-jennine-mesic.ngrok-free.dev',
+    ],
+  },
+  preview: {
+    host: true,
+    allowedHosts: ['.onrender.com', 'localhost'],
+  },
 })

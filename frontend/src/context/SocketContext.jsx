@@ -1,14 +1,32 @@
-
 import React, { createContext, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { API_BASE_URL } from '../config/apiBaseUrl';
 
 export const SocketContext = createContext();
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
-const socket = io(BASE_URL, {
-    transports: [ 'websocket', 'polling' ],
-    withCredentials: true,
-});
+/** Vercel serverless cannot keep Socket.IO connections; set VITE_DISABLE_SOCKET=true there. */
+function createNoOpSocket() {
+    const noop = () => {};
+    return {
+        connected: false,
+        on: noop,
+        off: noop,
+        once: noop,
+        emit: noop,
+        disconnect: noop,
+        removeAllListeners: noop,
+    };
+}
+
+const socket =
+    import.meta.env.VITE_DISABLE_SOCKET === 'true'
+        ? createNoOpSocket()
+        : io(API_BASE_URL, {
+              transports: ['polling', 'websocket'],
+              withCredentials: true,
+              reconnectionAttempts: 8,
+              reconnectionDelay: 1500,
+          });
 
 const SocketProvider = ({ children }) => {
     useEffect(() => {

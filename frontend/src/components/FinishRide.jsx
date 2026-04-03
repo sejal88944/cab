@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const getCaptainToken = () => localStorage.getItem('captainToken') || localStorage.getItem('captain-token')
 
@@ -29,7 +30,7 @@ const FinishRide = (props) => {
 
     async function endRide() {
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/end-ride`, {
+            const response = await axios.post(`${API_BASE_URL}/rides/end-ride`, {
                 rideId: props.ride._id
             }, {
                 headers: {

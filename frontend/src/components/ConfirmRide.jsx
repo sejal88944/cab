@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react'
 import { UserDataContext } from '../context/UserContext'
 import Payment from './Payment'
 import axios from 'axios'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const ConfirmRide = (props) => {
     const { user } = useContext(UserDataContext)
@@ -26,8 +27,7 @@ const ConfirmRide = (props) => {
         if (paymentMethod === 'UPI' && createdRide?._id) {
             try {
                 const token = localStorage.getItem('token')
-                const base = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
-                const { data } = await axios.post(`${base}/rides/upi/verify`, {
+                const { data } = await axios.post(`${API_BASE_URL}/rides/upi/verify`, {
                     rideId: createdRide._id,
                     transactionRef: paymentMeta.transactionRef || `txn_${Date.now()}`,
                     status: paymentMeta.status || 'PENDING',

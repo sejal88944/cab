@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { UserDataContext } from '../context/UserContext'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const UserSignup = () => {
   const [name, setName] = useState('')
@@ -17,13 +18,11 @@ const UserSignup = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { setUser } = useContext(UserDataContext)
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
-
   const submitHandler = async (e) => {
     e.preventDefault()
     try {
       setLoading(true)
-      const response = await axios.post(`${BASE_URL}/users/register`, {
+      const response = await axios.post(`${API_BASE_URL}/users/register`, {
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim(),

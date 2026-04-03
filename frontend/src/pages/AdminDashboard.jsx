@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const getAuthHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('adminToken')}` })
 
@@ -31,7 +30,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     setAnalyticsError('')
     setAnalyticsLoading(true)
-    axios.get(`${BASE_URL}/admin/analytics`, { headers: getAuthHeader() })
+    axios.get(`${API_BASE_URL}/admin/analytics`, { headers: getAuthHeader() })
       .then((res) => {
         setAnalytics(res.data)
         setAnalyticsError('')
@@ -47,15 +46,15 @@ const AdminDashboard = () => {
     setTabError('')
     const h = { headers: getAuthHeader() }
     if (tab === 'users') {
-      axios.get(`${BASE_URL}/admin/users`, h).then((res) => setUsers(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
+      axios.get(`${API_BASE_URL}/admin/users`, h).then((res) => setUsers(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
     } else if (tab === 'drivers') {
-      axios.get(`${BASE_URL}/admin/drivers`, h).then((res) => setDrivers(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
+      axios.get(`${API_BASE_URL}/admin/drivers`, h).then((res) => setDrivers(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
     } else if (tab === 'rides') {
-      axios.get(`${BASE_URL}/admin/rides`, h).then((res) => setRides(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
+      axios.get(`${API_BASE_URL}/admin/rides`, h).then((res) => setRides(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
     } else if (tab === 'payments') {
-      axios.get(`${BASE_URL}/admin/payments`, h).then((res) => setPayments(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
+      axios.get(`${API_BASE_URL}/admin/payments`, h).then((res) => setPayments(res.data)).catch((e) => setTabError(e.response?.data?.message || e.message || 'Failed'))
     } else if (tab === 'pricing') {
-      axios.get(`${BASE_URL}/admin/pricing`, h)
+      axios.get(`${API_BASE_URL}/admin/pricing`, h)
         .then((res) => setPricingJson(JSON.stringify(res.data.rates || {}, null, 2)))
         .catch((e) => {
           setPricingJson('{}')
@@ -65,19 +64,19 @@ const AdminDashboard = () => {
   }, [tab])
 
   const approveDriver = (driverId) => {
-    axios.put(`${BASE_URL}/admin/drivers/${driverId}/approve`, {}, { headers: getAuthHeader() })
+    axios.put(`${API_BASE_URL}/admin/drivers/${driverId}/approve`, {}, { headers: getAuthHeader() })
       .then(() => setDrivers((d) => d.map((x) => (x._id === driverId ? { ...x, approved: true } : x))))
       .catch((e) => alert(e.response?.data?.message || 'Failed'))
   }
 
   const toggleUserBlock = (userId, blocked) => {
-    axios.patch(`${BASE_URL}/admin/users/${userId}/block`, { blocked }, { headers: getAuthHeader() })
+    axios.patch(`${API_BASE_URL}/admin/users/${userId}/block`, { blocked }, { headers: getAuthHeader() })
       .then(() => setUsers((list) => list.map((x) => (x._id === userId ? { ...x, blocked } : x))))
       .catch((e) => alert(e.response?.data?.message || 'Failed'))
   }
 
   const toggleDriverBlock = (driverId, blocked) => {
-    axios.patch(`${BASE_URL}/admin/drivers/${driverId}/block`, { blocked }, { headers: getAuthHeader() })
+    axios.patch(`${API_BASE_URL}/admin/drivers/${driverId}/block`, { blocked }, { headers: getAuthHeader() })
       .then(() => setDrivers((list) => list.map((x) => (x._id === driverId ? { ...x, blocked } : x))))
       .catch((e) => alert(e.response?.data?.message || 'Failed'))
   }
@@ -85,7 +84,7 @@ const AdminDashboard = () => {
   const savePricing = () => {
     try {
       const rates = JSON.parse(pricingJson)
-      axios.put(`${BASE_URL}/admin/pricing`, { rates }, { headers: getAuthHeader() })
+      axios.put(`${API_BASE_URL}/admin/pricing`, { rates }, { headers: getAuthHeader() })
         .then((res) => {
           setPricingJson(JSON.stringify(res.data.rates || {}, null, 2))
           alert('Pricing saved')

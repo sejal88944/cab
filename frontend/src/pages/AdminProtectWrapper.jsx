@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const AdminProtectWrapper = ({ children }) => {
   const token = localStorage.getItem('adminToken')
@@ -14,7 +13,7 @@ const AdminProtectWrapper = ({ children }) => {
       navigate('/admin')
       return
     }
-    axios.get(`${BASE_URL}/admin/analytics`, {
+    axios.get(`${API_BASE_URL}/admin/analytics`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => setAllowed(true))

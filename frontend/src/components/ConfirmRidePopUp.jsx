@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const getCaptainToken = () => localStorage.getItem('captainToken') || localStorage.getItem('captain-token')
 
@@ -17,7 +18,7 @@ const ConfirmRidePopUp = (props) => {
         if (!rideId) return
         setMarkingArrived(true)
         try {
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/arrive`, { rideId }, {
+            await axios.post(`${API_BASE_URL}/rides/arrive`, { rideId }, {
                 headers: { Authorization: `Bearer ${getCaptainToken()}` }
             })
             setArrived(true)
@@ -31,7 +32,7 @@ const ConfirmRidePopUp = (props) => {
     const submitHander = async (e) => {
         e.preventDefault()
 
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/start-ride`, {
+        const response = await axios.get(`${API_BASE_URL}/rides/start-ride`, {
             params: {
                 rideId: props.ride._id,
                 otp: otp

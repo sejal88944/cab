@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { CaptainDataContext } from '../context/CaptainContext'
 import axios from 'axios'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
 const getCaptainToken = () => localStorage.getItem('captainToken') || localStorage.getItem('captain-token')
 
 const PLANS = {
@@ -38,7 +38,7 @@ const CaptainDetails = () => {
 
     const refreshSubscription = useCallback(() => {
         const token = getCaptainToken()
-        axios.get(`${BASE_URL}/driver-subscriptions/my-status`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_BASE_URL}/driver-subscriptions/my-status`, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => setSubscription(res.data))
             .catch(() => setSubscription({ active: false }))
     }, [])
@@ -73,12 +73,12 @@ const CaptainDetails = () => {
     useEffect(() => {
         if (!captain?._id) return
         const token = getCaptainToken()
-        axios.get(`${BASE_URL}/captains/earnings`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_BASE_URL}/captains/earnings`, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => setEarnings(res.data))
             .catch(() => setEarnings({ totalEarnings: 0, count: 0, todayEarnings: 0, todayRides: 0 }))
         refreshSubscription()
-        axios.get(`${BASE_URL}/driver-subscriptions/plans`).then((res) => setPlans(res.data?.plans || PLANS))
-        axios.get(`${BASE_URL}/captains/rides/history`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_BASE_URL}/driver-subscriptions/plans`).then((res) => setPlans(res.data?.plans || PLANS))
+        axios.get(`${API_BASE_URL}/captains/rides/history`, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => setRideHistory(res.data?.rides || []))
             .catch(() => setRideHistory([]))
     }, [captain?._id, refreshSubscription])
@@ -87,7 +87,7 @@ const CaptainDetails = () => {
         const next = isOnline ? 'inactive' : 'active'
         setTogglingStatus(true)
         const token = getCaptainToken()
-        axios.post(`${BASE_URL}/captains/status`, { status: next }, { headers: { Authorization: `Bearer ${token}` } })
+        axios.post(`${API_BASE_URL}/captains/status`, { status: next }, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => {
                 setIsOnline(res.data?.status === 'active')
                 if (setCaptain) setCaptain({ ...captain, status: res.data?.status })
@@ -105,7 +105,7 @@ const CaptainDetails = () => {
         if (!price) return
         setSubscribing(true)
         const token = getCaptainToken()
-        axios.post(`${BASE_URL}/driver-subscriptions/create`, {
+        axios.post(`${API_BASE_URL}/driver-subscriptions/create`, {
             driverId: captain._id,
             plan: selectedPlan,
             paymentMode: 'Cash'

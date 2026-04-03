@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/apiBaseUrl';
 
 const CaptainDashboard = () => {
     const [subscription, setSubscription] = useState(null);
@@ -15,7 +16,7 @@ const CaptainDashboard = () => {
 
     const fetchSubscriptionStatus = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/driver-subscriptions/status/${driverId}`);
+            const response = await axios.get(`${API_BASE_URL}/driver-subscriptions/status/${driverId}`);
             setSubscription(response.data);
         } catch (error) {
             console.error(error);
@@ -28,14 +29,14 @@ const CaptainDashboard = () => {
         setRenewing(true);
         try {
             // For demo, assume Razorpay payment
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/payments/create-subscription-order`, {
+            await axios.post(`${API_BASE_URL}/payments/create-subscription-order`, {
                 driverId,
                 amount: 30 // Daily amount
             });
 
             // Integrate Razorpay payment here
             // For now, assume payment successful
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/driver-subscriptions/renew`, {
+            await axios.post(`${API_BASE_URL}/driver-subscriptions/renew`, {
                 driverId,
                 paymentMode: 'Razorpay',
                 transactionId: 'demo_txn_' + Date.now()

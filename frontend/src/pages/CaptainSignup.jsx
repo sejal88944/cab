@@ -2,8 +2,8 @@ import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { CaptainDataContext } from '../context/CaptainContext'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
 const PLAN_PRICES = {
   BIKE: { weekly: 29, monthly: 99, yearly: 999 },
   AUTO: { weekly: 49, monthly: 149, yearly: 1299 },
@@ -32,7 +32,7 @@ const CaptainSignup = () => {
     e.preventDefault()
     try {
       setLoading(true)
-      const response = await axios.post(`${BASE_URL}/captains/register`, {
+      const response = await axios.post(`${API_BASE_URL}/captains/register`, {
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim(),

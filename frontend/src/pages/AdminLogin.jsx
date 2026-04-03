@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('')
@@ -18,7 +17,7 @@ const AdminLogin = () => {
       setLoading(true)
       const payload = { email: String(email).trim(), password: String(password).trim() }
       console.log('ADMIN LOGIN payload:', payload)
-      const { data } = await axios.post(`${BASE_URL}/admin/login`, payload)
+      const { data } = await axios.post(`${API_BASE_URL}/admin/login`, payload)
       localStorage.setItem('adminToken', data.token)
       navigate('/admin/dashboard')
     } catch (err) {

@@ -14,6 +14,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LiveTracking from '../components/LiveTracking';
 import RideMap from '../components/RideMap';
 import GooglePlaceAutocomplete from '../components/GooglePlaceAutocomplete';
+import { API_BASE_URL } from '../config/apiBaseUrl';
 
 const Home = () => {
     const location = useLocation()
@@ -112,7 +113,7 @@ const Home = () => {
         if (!ride?._id) return
         if (![ 'searching', 'accepted', 'arrived' ].includes(ride.status)) return
         const token = localStorage.getItem('token')
-        axios.get(`${import.meta.env.VITE_BASE_URL}/rides/${ride._id}/passenger-otp`, {
+        axios.get(`${API_BASE_URL}/rides/${ride._id}/passenger-otp`, {
             headers: { Authorization: `Bearer ${token}` },
         }).then((res) => {
             if (res.data?.otp) setPassengerOtp(res.data.otp)
@@ -125,7 +126,7 @@ const Home = () => {
         if (![ 'accepted', 'arrived' ].includes(ride.status)) return
         const token = localStorage.getItem('token')
         const tick = () => {
-            axios.get(`${import.meta.env.VITE_BASE_URL}/rides/${ride._id}`, {
+            axios.get(`${API_BASE_URL}/rides/${ride._id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             }).then((res) => {
                 const data = res.data
@@ -152,11 +153,11 @@ const Home = () => {
             try {
                 // Keep attempting assignment while searching (Uber/Ola-like behavior)
                 if (ride?.status === 'searching' && (!ride?.captain?._id && !ride?.captain)) {
-                    await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/${ride._id}/retry-assign`, {}, {
+                    await axios.post(`${API_BASE_URL}/rides/${ride._id}/retry-assign`, {}, {
                         headers: { Authorization: `Bearer ${token}` }
                     }).catch(() => {})
                 }
-                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/${ride._id}`, {
+                const res = await axios.get(`${API_BASE_URL}/rides/${ride._id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 if (cancelled) return
@@ -195,7 +196,7 @@ const Home = () => {
             return
         }
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
+            const response = await axios.get(`${API_BASE_URL}/maps/get-suggestions`, {
                 params: { input: trimmed },
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -217,7 +218,7 @@ const Home = () => {
             return
         }
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
+            const response = await axios.get(`${API_BASE_URL}/maps/get-suggestions`, {
                 params: { input: trimmed },
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -232,7 +233,7 @@ const Home = () => {
     const fetchPickupCoords = async (address) => {
         if (!address?.trim()) return
         try {
-            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-coordinates`, {
+            const res = await axios.get(`${API_BASE_URL}/maps/get-coordinates`, {
                 params: { address: address.trim() },
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             })
@@ -247,7 +248,7 @@ const Home = () => {
     const fetchDropCoords = async (address) => {
         if (!address?.trim()) return
         try {
-            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-coordinates`, {
+            const res = await axios.get(`${API_BASE_URL}/maps/get-coordinates`, {
                 params: { address: address.trim() },
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             })
@@ -365,7 +366,7 @@ const Home = () => {
         setVehiclePanel(true)
         setPanelOpen(false)
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+            const response = await axios.get(`${API_BASE_URL}/rides/get-fare`, {
                 params: { pickup: p, destination: d },
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             })
@@ -389,7 +390,7 @@ const Home = () => {
             setVehicleFound(true)
             setVehiclePanel(false)
             setConfirmRidePanel(false)
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
+            const response = await axios.post(`${API_BASE_URL}/rides/create`, {
                 pickupLocation: pickup,
                 dropLocation: destination,
                 city: city || 'Pune',

@@ -9,8 +9,8 @@ import { SocketContext } from '../context/SocketContext'
 import { CaptainDataContext } from '../context/CaptainContext'
 import LiveTracking from '../components/LiveTracking'
 import axios from 'axios'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
 const getCaptainToken = () => localStorage.getItem('captainToken') || localStorage.getItem('captain-token')
 
 const CaptainHome = () => {
@@ -54,7 +54,7 @@ const CaptainHome = () => {
         doJoin()
         socket.on('connect', doJoin)
         const token = getCaptainToken()
-        const fetchPending = () => axios.get(`${BASE_URL}/rides/pending`, {
+        const fetchPending = () => axios.get(`${API_BASE_URL}/rides/pending`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Cache-Control': 'no-cache',
@@ -71,7 +71,7 @@ const CaptainHome = () => {
             })
             .catch(() => setPendingRides([]))
         fetchPending()
-        axios.get(`${BASE_URL}/driver-subscriptions/my-status`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_BASE_URL}/driver-subscriptions/my-status`, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => setSubscriptionStatus(res.data))
             .catch(() => setSubscriptionStatus({ active: false }))
         const updateLocation = () => {
@@ -117,7 +117,7 @@ const CaptainHome = () => {
     async function confirmRide() {
         if (!ride?._id) return
         try {
-            const res = await axios.patch(`${BASE_URL}/rides/${ride._id}/accept`, {}, {
+            const res = await axios.patch(`${API_BASE_URL}/rides/${ride._id}/accept`, {}, {
                 headers: { Authorization: `Bearer ${getCaptainToken()}` }
             })
             setRide(res.data)
@@ -132,7 +132,7 @@ const CaptainHome = () => {
     async function rejectRide() {
         if (!ride?._id) return
         try {
-            await axios.patch(`${BASE_URL}/rides/${ride._id}/reject`, {}, {
+            await axios.patch(`${API_BASE_URL}/rides/${ride._id}/reject`, {}, {
                 headers: { Authorization: `Bearer ${getCaptainToken()}` }
             })
             setRidePopupPanel(false)

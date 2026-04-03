@@ -6,6 +6,7 @@ import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import RideMap from '../components/RideMap'
 import LiveTracking from '../components/LiveTracking'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
 const defaultCenter = { lat: 18.5204, lng: 73.8567 }
 const getCaptainToken = () => localStorage.getItem('captainToken') || localStorage.getItem('captain-token')
@@ -34,7 +35,7 @@ const CaptainRiding = () => {
 
     useEffect(() => {
         if (!rideData?.pickupLocation?.trim()) return
-        axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-coordinates`, {
+        axios.get(`${API_BASE_URL}/maps/get-coordinates`, {
             params: { address: rideData.pickupLocation.trim() },
             headers: { Authorization: `Bearer ${getCaptainToken()}` }
         }).then((res) => {
@@ -44,7 +45,7 @@ const CaptainRiding = () => {
 
     useEffect(() => {
         if (!rideData?.dropLocation?.trim()) return
-        axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-coordinates`, {
+        axios.get(`${API_BASE_URL}/maps/get-coordinates`, {
             params: { address: rideData.dropLocation.trim() },
             headers: { Authorization: `Bearer ${getCaptainToken()}` }
         }).then((res) => {

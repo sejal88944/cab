@@ -5,8 +5,8 @@ import { SocketContext } from '../context/SocketContext'
 import RideMap from '../components/RideMap'
 import LiveTracking from '../components/LiveTracking'
 import RideStatusStepper from '../components/RideStatusStepper'
+import { API_BASE_URL } from '../config/apiBaseUrl'
 
-const BASE = import.meta.env.VITE_BASE_URL || 'http://localhost:5001'
 const UPI_PAYEE = import.meta.env.VITE_UPI_PAYEE_NAME || 'RideEasy'
 
 const Riding = () => {
@@ -68,7 +68,7 @@ const Riding = () => {
 
     useEffect(() => {
         if (!ride?.pickupLocation?.trim()) return
-        axios.get(`${BASE}/maps/get-coordinates`, {
+        axios.get(`${API_BASE_URL}/maps/get-coordinates`, {
             params: { address: ride.pickupLocation.trim() },
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }).then((res) => {
@@ -78,7 +78,7 @@ const Riding = () => {
 
     useEffect(() => {
         if (!ride?.dropLocation?.trim()) return
-        axios.get(`${BASE}/maps/get-coordinates`, {
+        axios.get(`${API_BASE_URL}/maps/get-coordinates`, {
             params: { address: ride.dropLocation.trim() },
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }).then((res) => {
@@ -91,7 +91,7 @@ const Riding = () => {
         if (![ 'accepted', 'arrived', 'started', 'completed' ].includes(ride?.status)) return
         const token = localStorage.getItem('token')
         const poll = () => {
-            axios.get(`${BASE}/rides/${ride._id}`, { headers: { Authorization: `Bearer ${token}` } })
+            axios.get(`${API_BASE_URL}/rides/${ride._id}`, { headers: { Authorization: `Bearer ${token}` } })
                 .then((res) => {
                     setRide(res.data)
                     const loc = res.data?.captain?.location
@@ -109,7 +109,7 @@ const Riding = () => {
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!token) return
-        axios.get(`${BASE}/users/profile`, {
+        axios.get(`${API_BASE_URL}/users/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         }).then((res) => {
             if (res.data?.user?.walletBalance != null) {
@@ -138,7 +138,7 @@ const Riding = () => {
         if (!ride?._id) return
         setPaying(true)
         try {
-            const { data } = await axios.post(`${BASE}/rides/pay-mock`, { rideId: ride._id, method }, {
+            const { data } = await axios.post(`${API_BASE_URL}/rides/pay-mock`, { rideId: ride._id, method }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             })
             setRide(data.ride)
@@ -163,7 +163,7 @@ const Riding = () => {
         setSubmittingRating(true)
         try {
             const token = localStorage.getItem('token')
-            const res = await axios.post(`${BASE}/rides/rate`, {
+            const res = await axios.post(`${API_BASE_URL}/rides/rate`, {
                 rideId: ride._id,
                 rating: value,
                 comment: comment.trim(),
